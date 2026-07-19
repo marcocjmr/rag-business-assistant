@@ -1,8 +1,8 @@
 -- Schema para el almacén de vectores del asistente RAG.
--- Ejecutar en el SQL Editor de Supabase (Dashboard > SQL Editor > New query).
+-- Ejecutar en el SQL Editor de Neon (console.neon.tech > tu proyecto > SQL Editor).
 
 -- pgvector añade el tipo de columna `vector` y los operadores de distancia.
--- En Supabase la extensión ya está disponible; solo hay que habilitarla.
+-- Neon la incluye preinstalada; solo hay que habilitarla.
 create extension if not exists vector;
 
 -- Cada fila es un "chunk": un fragmento del documento de la clínica
@@ -14,7 +14,9 @@ create table if not exists documents (
   embedding vector(1536) not null -- text-embedding-3-small produce 1536 dimensiones
 );
 
--- Función de búsqueda por similitud, expuesta al cliente vía RPC.
+-- Función de búsqueda por similitud.
+-- Encapsularla mantiene la lógica de ranking versionada junto al schema;
+-- el código de la app solo hace: select * from match_documents($1, 3)
 -- `<=>` es el operador de distancia coseno de pgvector (0 = idénticos, 2 = opuestos);
 -- se convierte a similitud con `1 - distancia` para que sea más legible (1 = idénticos).
 create or replace function match_documents(

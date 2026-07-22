@@ -1,6 +1,7 @@
-import { streamText, convertToModelMessages, type UIMessage } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { retrieveContext, formatContext } from "@/lib/retrieval";
+import type { ChatMessage } from "@/lib/types";
 
 // Este archivo solo corre en el servidor: OPENAI_API_KEY y DATABASE_URL
 // nunca se envían al navegador.
@@ -34,7 +35,7 @@ ${context}`;
 }
 
 /** En el AI SDK v5+ un mensaje es una lista de `parts`, no un string plano. */
-function extractText(message: UIMessage | undefined): string {
+function extractText(message: ChatMessage | undefined): string {
   if (!message) return "";
   return message.parts
     .filter((part): part is { type: "text"; text: string } => part.type === "text")
@@ -45,7 +46,7 @@ function extractText(message: UIMessage | undefined): string {
 
 export async function POST(req: Request) {
   try {
-    const { messages }: { messages: UIMessage[] } = await req.json();
+    const { messages }: { messages: ChatMessage[] } = await req.json();
 
     const question = extractText(messages.at(-1));
     if (!question) {

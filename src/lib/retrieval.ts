@@ -1,6 +1,6 @@
 import { embed } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { sql } from "./db";
+import { getSql } from "./db";
 
 /**
  * Debe ser el MISMO modelo usado en la ingesta.
@@ -47,7 +47,7 @@ export async function retrieveContext(question: string): Promise<RetrievedChunk[
 
   // `match_documents` vive en la base (db/schema.sql). El vector se envía como
   // parámetro y se castea, nunca concatenado en el texto de la consulta.
-  const rows = (await sql`
+  const rows = (await getSql()`
     select id, content, metadata, similarity
     from match_documents(${JSON.stringify(embedding)}::vector, ${MATCH_COUNT})
   `) as RetrievedChunk[];

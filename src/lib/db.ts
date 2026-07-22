@@ -1,9 +1,29 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL no está definida — copia .env.example a .env.local");
+let client: NeonQueryFunction<false, false> | null = null;
+
+/**
+ * Devuelve el cliente SQL, creándolo la primera vez que se usa.
+ *
+ * La conexión se resuelve de forma perezosa a propósito: si se creara al
+ * importar el módulo, `next build` fallaría, porque el build importa cada route
+ * handler para analizarlo y en ese momento las variables de entorno pueden no
+ * existir todavía. En general, un módulo no debería lanzar excepciones solo por
+ * ser importado.
+ *
+ * El cliente se memoiza para no reconstruirlo en cada consulta.
+ *
+ * Uso: getSql()`select * from documents where id = ${id}`
+ * La interpolación del tagged template se convierte en consulta parametrizada,
+ * nunca en concatenación de strings, así que no hay inyección SQL.
+ */
+export function getSql(): NeonQueryFunction<false, false> {
+  if (!client) {
+    const url = process.env.DATABASE_URL;
+    if (!url) {
+      throw new Error("DATABASE_URL no está definida — copia .env.example a .env.local");
+    }
+    client = neon(url);
+  }
+  return client;
 }
-
-// Cliente SQL como tagged template: sql`select ... where id = ${id}`
-// interpola de forma segura (parametrizada), nunca por concatenación de strings.
-export const sql = neon(process.env.DATABASE_URL);

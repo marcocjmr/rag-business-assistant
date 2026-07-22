@@ -156,7 +156,8 @@ async function main() {
       `${usage.tokens} tokens · ~$${cost.toFixed(6)}`,
   );
 
-  const { sql } = await import("../src/lib/db");
+  const { getSql } = await import("../src/lib/db");
+  const sql = getSql();
 
   // Borrado + inserción dentro de una transacción: si algo falla a medio camino
   // no queda la tabla vacía ni a medias.

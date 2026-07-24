@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "ingest": "tsx scripts/ingest.ts"
+    "ingest": "tsx scripts/ingest.ts",
+    "db:setup": "tsx scripts/apply-schema.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.16",
